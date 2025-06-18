@@ -38,19 +38,12 @@ resolve_node() {
       lookup_url="${base_url}/v${node_version}/"
       ;;
   esac
-  echo "DEBUG - lookup_url: $lookup_url"
 
   local node_file=$(curl --silent --get --retry 5 --retry-max-time 15 $lookup_url -f | grep -oE  'node-v[0-9]+\.[0-9]+\.[0-9]+-linux-x64\.tar\.gz')
-  echo "DEBUG - node_file: $node_file"
   if [ "$?" -eq "0" ]; then
-    echo "DEBUG - assigning number and url"
     number=$(echo "$node_file" | sed -E 's/.*node-v([0-9]+\.[0-9]+\.[0-9]+).*/\1/')
     url="${base_url}/v${number}/${node_file//\"/}"
-    echo "DEBUG - number: $number"
-    echo "DEBUG - url: $url"
   else
-    echo "DEBUG - local node_file not found"
-    echo "DEBUG - node_version: $node_version"
     fail_bin_install node $node_version;
   fi
 }
@@ -94,7 +87,6 @@ cleanup_old_node() {
 }
 
 install_node() {
-  echo "DEBUG - install_node start"
   info "Installing Node $node_version..."
   tar xzf ${cached_node} -C /tmp
   local node_dir=$heroku_dir/node
