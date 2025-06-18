@@ -40,7 +40,7 @@ resolve_node() {
   esac
   echo "DEBUG - lookup_url: $lookup_url"
 
-  local node_file=$(curl --silent --get --retry 5 --retry-max-time 15 $lookup_url -f | grep -oE  '"node-v[0-9]+.[0-9]+.[0-9]+-linux-x64.tar.gz"')
+  local node_file=$(curl --silent --get --retry 5 --retry-max-time 15 $lookup_url -f | grep -oE  'node-v[0-9]+\.[0-9]+\.[0-9]+-linux-x64\.tar\.gz')
   echo "DEBUG - node_file: $node_file"
   if [ "$?" -eq "0" ]; then
     echo "DEBUG - assigning number and url"
