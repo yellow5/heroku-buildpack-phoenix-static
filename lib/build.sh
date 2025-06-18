@@ -21,6 +21,7 @@ load_previous_npm_node_versions() {
 }
 
 resolve_node() {
+  echo "DEBUG - resolve_node start"
   echo "Resolving node version $node_version..."
 
   local base_url="https://nodejs.org/dist"
@@ -40,14 +41,20 @@ resolve_node() {
 
   local node_file=$(curl --silent --get --retry 5 --retry-max-time 15 $lookup_url -f | grep -oE  '"node-v[0-9]+.[0-9]+.[0-9]+-linux-x64.tar.gz"')
   if [ "$?" -eq "0" ]; then
+    echo "DEBUG - assigning number and url"
     number=$(echo "$node_file" | sed -E 's/.*node-v([0-9]+\.[0-9]+\.[0-9]+).*/\1/')
     url="${base_url}/v${number}/${node_file//\"/}"
+    echo "DEBUG - number: $number"
+    echo "DEBUG - url: $url"
   else
+    echo "DEBUG - local node_file not found"
+    echo "DEBUG - node_version: $node_version"
     fail_bin_install node $node_version;
   fi
 }
 
 download_node() {
+  echo "DEBUG - download_node start"
   local platform=linux-x64
 
   if [ ! -f ${cached_node} ]; then
@@ -85,6 +92,7 @@ cleanup_old_node() {
 }
 
 install_node() {
+  echo "DEBUG - install_node start"
   info "Installing Node $node_version..."
   tar xzf ${cached_node} -C /tmp
   local node_dir=$heroku_dir/node
