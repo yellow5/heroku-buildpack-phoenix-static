@@ -27,33 +27,24 @@ resolve_node() {
   local lookup_url=""
 
   case "$node_version" in
-    ""|latest)
-      lookup_url="${base_url}/latest/"
-      ;;
-    v*)
-      lookup_url="${base_url}/${node_version}/"
-      ;;
-    *)
-      lookup_url="${base_url}/v${node_version}/"
-      ;;
+    ""|latest) lookup_url="${base_url}/latest/" ;;
+    v*)        lookup_url="${base_url}/${node_version}/" ;;
+    *)         lookup_url="${base_url}/v${node_version}/" ;;
   esac
 
-  # Grab the first Linux-x64 tarball filename (quotes optional in HTML)
-  local node_file
-  node_file=$(
+  # ── 1. Pull the *href* value that contains the Linux-x64 tarball ──
+  local node_path
+  node_path=$(
     curl -sSfL --retry 5 --retry-max-time 15 "$lookup_url" \
-      | grep -m1 -Eo '"?node-v[0-9]+\.[0-9]+\.[0-9]+-linux-x64\.tar\.gz"?'
+      | grep -Eo -m1 '/dist[^"]*node-v[0-9]+\.[0-9]+\.[0-9]+-linux-x64\.tar\.gz'
   )
 
-  if [ "$?" -eq 0 ] && [ -n "$node_file" ]; then
-    # Strip any surrounding quotes before reuse
-    node_file=${node_file//\"/}
+  if [ "$?" -eq 0 ] && [ -n "$node_path" ]; then
+    # ── 2. Extract bare filename from the path ──
+    local node_file=${node_path##*/}
 
-    # Extract the version portion (e.g. 22.16.0)
-    number=$(echo "$node_file" \
-      | sed -E 's/.*node-v([0-9]+\.[0-9]+\.[0-9]+).*/\1/')
-
-    # Construct the final download URL expected by the rest of the buildpack
+    # ── 3. Derive the version number & final download URL ──
+    local number=${node_file#node-v}; number=${number%-linux-x64.tar.gz}
     url="${base_url}/v${number}/${node_file}"
   else
     fail_bin_install node "$node_version"
